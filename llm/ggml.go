@@ -400,6 +400,11 @@ func (llm GGML) GraphSize(context, batch uint64) (partialOffload, fullOffload ui
 				4*batch*(1+2*embedding+context*(1+heads))+embedding*(6*context*headsKV/heads+embedding*9/16),
 			)
 		}
+	case "mllama":
+		var numVisionTokens, numTiles uint64 = 1601, 4
+		fullOffload = 4 * (numVisionTokens*numTiles*embedding +
+			llm.KV().GQA()*numVisionTokens*numTiles +
+			2*embeddingHeadsK*numVisionTokens*numTiles*headsKV)
 	case "gemma", "gemma2":
 		fullOffload = max(
 			4*batch*(embedding+vocab),
